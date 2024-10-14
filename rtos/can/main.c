@@ -219,13 +219,12 @@ console_task(void *arg __attribute__((unused))) {
 }
 
 /*********************************************************************
- * Main program: Device initialization etc.
+ // Main program: Device initialization etc.
  *********************************************************************/
 int
 main(void) {
 
 	rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE8_72MHZ]);
-
         rcc_periph_clock_enable(RCC_GPIOC);
         gpio_set_mode(GPIO_PORT_LED,GPIO_MODE_OUTPUT_50_MHZ,GPIO_CNF_OUTPUT_PUSHPULL,GPIO_LED);
 
@@ -235,16 +234,22 @@ main(void) {
 
 	std_set_device(mcu_uart1);			// Use UART1 for std I/O
         open_uart(1,115200,"8N1","rw",1,1);
+		//baudrate configuration
 
 	initialize_can(false,true,true);		// !nart, locked, altcfg=true PB8/PB9
+	//clock setting 72MHZ, GPIO Setting 
+	//this function is located in canmsgs.c file 
 
 	led(false);
 	xTaskCreate(console_task,"console",200,NULL,configMAX_PRIORITIES-1,NULL);
+	//task create
 
 	mutex = xSemaphoreCreateMutex();
 	xTaskCreate(flash_task,"flash",100,NULL,configMAX_PRIORITIES-1,NULL);
+	//mutex create
 
 	vTaskStartScheduler();
+	//TaskSechuler ( in kerenl )
 	for (;;);
 }
 

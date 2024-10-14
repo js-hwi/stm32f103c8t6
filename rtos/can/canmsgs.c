@@ -47,6 +47,7 @@ can_rx_isr(uint8_t fifo,unsigned msgcount) {
                 cmsg.rtrf = rtrf;
                 cmsg.fifo = fifo;
                 // If the queue is full, the message is lost
+				//NVIC :  Nested Vectored Interrupt Controller
                 xQueueSendToBackFromISR(canrxq,&cmsg,NULL);
         }
 }
@@ -80,7 +81,7 @@ can_rx_task(void *arg __attribute((unused))) {
         for (;;) {
                 if ( xQueueReceive(canrxq,&cmsg,portMAX_DELAY) == pdPASS )
 			can_recv(&cmsg);
-        }
+         }
 }
 
 /*********************************************************************
@@ -88,10 +89,11 @@ can_rx_task(void *arg __attribute((unused))) {
  *********************************************************************/
 
 void
-initialize_can(bool nart,bool locked,bool altcfg) {
+initialize_can(bool nart,bool locked,bool altcfg) {  //
 
         rcc_periph_clock_enable(RCC_AFIO);
         rcc_peripheral_enable_clock(&RCC_APB1ENR, RCC_APB1ENR_CAN1EN);
+		//can bus 포트로 사용하기 위한 GPIO 설정
 
 	/*************************************************************
 	 * When:
@@ -101,16 +103,18 @@ initialize_can(bool nart,bool locked,bool altcfg) {
 	if ( altcfg ) {
 	        rcc_periph_clock_enable(RCC_GPIOB);
 	        gpio_set_mode(GPIOB,GPIO_MODE_OUTPUT_50_MHZ,GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN,GPIO_CAN_PB_TX);
+			//Tx는 opendrain
 	        gpio_set_mode(GPIOB,GPIO_MODE_INPUT,GPIO_CNF_INPUT_FLOAT,GPIO_CAN_PB_RX);
-
+			//Rx는 Floating 
 	        gpio_primary_remap(                             // Map CAN1 to use PB8/PB9
 	                AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_OFF,      // Optional
 	                AFIO_MAPR_CAN1_REMAP_PORTB);            // CAN_RX=PB8, CAN_TX=PB9
 	} else	{
 	        rcc_periph_clock_enable(RCC_GPIOA);
 	        gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_50_MHZ,GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN,GPIO_CAN_TX);
+			//Tx(Transmission)
 	        gpio_set_mode(GPIOA,GPIO_MODE_INPUT,GPIO_CNF_INPUT_FLOAT,GPIO_CAN_RX);
-
+			//Rx(Receiver)
 	        gpio_primary_remap(                             // Map CAN1 to use PA11/PA12
 	                AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_OFF,      // Optional
 			AFIO_MAPR_CAN1_REMAP_PORTA);            // CAN_RX=PA11, CAN_TX=PA12
@@ -131,6 +135,7 @@ initialize_can(bool nart,bool locked,bool altcfg) {
 		PARM_BRP,				// Baud rate prescaler for 33.333 kbs
 		false,					// Loopback
 		false);					// Silent
+
 
 	can_filter_id_mask_16bit_init(
 		0,					// Filter bank 0

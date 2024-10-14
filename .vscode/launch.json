@@ -1,0 +1,31 @@
+{
+    "configurations": [
+        {
+            "name": "Debug (OpenOCD)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "interface": "swd",
+            "device": "STM32F103C8T6",
+            "runToEntryPoint": "main",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/stm32f1x.cfg"
+            ],
+            "preLaunchCommands": [
+                "set mem inaccessible-by-default off",
+                "monitor reset"
+            ],
+            "postLaunchCommands": [
+                "monitor reset init",
+                "monitor sleep 200",
+                "target extended-remote localhost:50000"
+            ],
+            "executable": "${fileDirname}/${fileBasenameNoExtension}.elf",
+            
+            "cwd": "${fileDirname}",
+            "gdbPath": "/opt/gcc-arm/bin/arm-none-eabi-gdb",
+            
+        }
+    ]
+}

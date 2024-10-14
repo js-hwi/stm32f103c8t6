@@ -60,7 +60,7 @@ uart_putc(char ch) {
 static void
 task1(void *args __attribute__((unused))) {
 	int c = '0' - 1;
-
+ 
 	for (;;) {
 		gpio_toggle(GPIOC,GPIO13);
 		vTaskDelay(pdMS_TO_TICKS(200));
